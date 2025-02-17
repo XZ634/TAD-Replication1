@@ -2,7 +2,9 @@
 title: "Replicatin 1: Sentiment Analysis on Speeches"
 author: "Xiangming Zeng; Yihan Chen"
 date: "2025-02-10"
-format: html
+format:
+  html:
+    self-contained: true
 editor: visual
 ---
 
@@ -59,13 +61,13 @@ In this section, we replicate the sentiment analysis methodology outlined in Kli
 
 In our **data preprocessing workflow**, we transform raw text into a tidy format suitable for sentiment analysis.
 
-The **preprocessing steps** involve: 
+The **preprocessing steps** involve:
 
-1. **Importing and structuring raw text data**: Converting speech transcripts into a paragraph-based format. 
+1.  **Importing and structuring raw text data**: Converting speech transcripts into a paragraph-based format.
 
-2. **Transforming text into a tibble structure**: Assigning line numbers to each text segment for structured processing. 
+2.  **Transforming text into a tibble structure**: Assigning line numbers to each text segment for structured processing.
 
-3. **Tokenization and stopword removal**: Converting text into individual words (tokens) and filtering out common stopwords.
+3.  **Tokenization and stopword removal**: Converting text into individual words (tokens) and filtering out common stopwords.
 
 ```{r}
 # Harris
@@ -151,7 +153,7 @@ text_tidy_trump <- text_tidy_trump %>%
   anti_join(stop_words, by = join_by(word))
 ```
 
-### 2.2 Keyword Frequency & Sentiments 
+### 2.2 Keyword Frequency & Sentiments
 
 The first graph shows **the frequency of the most common words** in each speech, with words colored with corresponding sentiments in NRC lexicon.
 
@@ -447,7 +449,7 @@ Harris’ and Trump’s speeches exhibit **different sentiment patterns** when a
 
 In the 7th paragraph, we see lots of negations:
 
->On the campaign, I would often say when we fight, we win. But here's the thing, here's the thing, sometimes the fight takes a while. That doesn't mean we won't win. That doesn't mean we won't win. The important thing is don't ever give up. Don't ever give up. Don't ever stop trying to make the world a better place. You have power. You have power. And don't you ever listen when anyone tells you something is impossible because it has never been done before.
+> On the campaign, I would often say when we fight, we win. But here's the thing, here's the thing, sometimes the fight takes a while. That doesn't mean we won't win. That doesn't mean we won't win. The important thing is don't ever give up. Don't ever give up. Don't ever stop trying to make the world a better place. You have power. You have power. And don't you ever listen when anyone tells you something is impossible because it has never been done before.
 
 In the next step, we tried to remove these negations (like **"don't"**, **"doesn't"**, **"don't ever"** and **"But"**) and see whether this drop will disappear.
 
