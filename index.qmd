@@ -1,0 +1,524 @@
+---
+title: "Replicatin 1: Sentiment Analysis on Speeches"
+author: "Xiangming Zeng; Yihan Chen"
+date: "2025-02-10"
+format: html
+editor: visual
+---
+
+```{r Setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+```{r}
+# loading packages
+pacman::p_load(tidyverse, stringr, tidytext, tidyr, igraph, ggraph, gridExtra, vader, janeaustenr, textdata)
+rm(list=ls())
+```
+
+## 1. Introduction
+
+### 1.1 Background
+
+For this replication exercise, we have selected [*Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data* by Klinkhammer (2022)](https://doi.org/10.48550/arxiv.2206.12649). The original paper presents a structured workflow for conducting sentiment analysis using **tidytext** in R, with a focus on visualizing sentiment trends in textual data.
+
+Our replication primarily focuses on the application part, which analyzes political speeches. The original tutorial examines two simultaneous speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated [GitHub repository](https://github.com/statistical-thinking/sentiment-analysis/tree/main).
+
+Given this limitation, we selected two alternative speeches of political significance: **Donald Trump's victory speech** and **Kamala Harris' concession speech** from the 2024 U.S. presidential election.
+
+On November 6, 2024, former President Donald Trump was declared the winner of the U.S. presidential election. The Associated Press officially called the race at 5:38 a.m. ET, and Trump delivered his victory speech from Florida at 2:30 a.m. ET, celebrating what he described as "the greatest political movement of all time." Meanwhile, Vice President Kamala Harris conceded the election in a speech delivered at Howard University in Washington, D.C., urging her supporters to continue fighting for democracy.
+
+We believe that comparing these two speeches would be very interesting. We attempt to explore whether sentiment analysis of the speeches can reveal the different emotional reactions of politicians to election victory and defeat.
+
+### 1.2 Methodology and Replication Approach
+
+#### 1.2.1 Preprocessing
+
+-   Loading and cleaning the text data from both speeches.
+-   Transforming the text into a *tibble* format.
+-   Structuring the dataset into a *tidy* format to facilitate sentiment analysis.
+
+#### 1.2.2 Sentiment Analysis and Visualization
+
+We replicate the **four primary visualizations** presented in the paper:
+
+1.  **Keyword Sentiment Distribution**
+    -   Identifying the most frequent words and their associated sentiment scores.
+2.  **Lexicon-Based Sentiment Distribution**
+    -   Categorizing words into sentiment groups based on "nrc".
+3.  **Intertemporal Sentiment Trends**
+    -   Analyzing sentiment progression over the course of each speech.
+4.  **Overall Sentiment Scores**
+    -   Aggregating sentiment values to compare the tone of the two speeches using "bing".
+
+## 2. Sentiment Analysis On Political Speeches: Harris v.s. Trump
+
+In this section, we replicate the sentiment analysis methodology outlined in Klinkhammer (2022), applying it to two significant political speeches from the 2024 U.S. presidential election.
+
+### 2.1 Data Pre-Processing
+
+In our **data preprocessing workflow**, we transform raw text into a tidy format suitable for sentiment analysis.
+
+The **preprocessing steps** involve: 
+
+1. **Importing and structuring raw text data**: Converting speech transcripts into a paragraph-based format. 
+
+2. **Transforming text into a tibble structure**: Assigning line numbers to each text segment for structured processing. 
+
+3. **Tokenization and stopword removal**: Converting text into individual words (tokens) and filtering out common stopwords.
+
+```{r}
+# Harris
+lines_harris <- readLines("harris.txt")
+
+# per paragraph per line
+paragraphs_harris <- c()
+current_paragraph_harris <- c()
+
+for (line_harris in lines_harris) {
+  if (line_harris == "") {
+    if (length(current_paragraph_harris) > 0) {
+      paragraphs_harris <- c(paragraphs_harris, paste(current_paragraph_harris, collapse = " "))
+      current_paragraph_harris <- c()
+    }
+  } else {
+    current_paragraph_harris <- c(current_paragraph_harris, line_harris)
+  }
+}
+
+if (length(current_paragraph_harris) > 0) {
+  paragraphs_harris <- c(paragraphs_harris, paste(current_paragraph_harris, collapse = " "))
+}
+
+imported_text_harris <- data.frame(text = paragraphs_harris, stringsAsFactors = FALSE)
+```
+
+```{r}
+# add line number
+text_df_harris <- tibble(line = 1:nrow(imported_text_harris), text = imported_text_harris$text)
+```
+
+```{r}
+# tidy data frame
+text_tidy_harris <- text_df_harris %>%
+  unnest_tokens(word, text)
+
+# remove stop words
+data(stop_words)
+text_tidy_harris <- text_tidy_harris %>%
+  anti_join(stop_words, by = join_by(word))
+```
+
+```{r}
+# Trump
+lines_trump <- readLines("trump.txt")
+
+# per paragraph per line
+paragraphs_trump <- c()
+current_paragraph_trump <- c()
+
+for (line_trump in lines_trump) {
+  if (line_trump == "") {
+    if (length(current_paragraph_trump) > 0) {
+      paragraphs_trump <- c(paragraphs_trump, paste(current_paragraph_trump, collapse = " "))
+      current_paragraph_trump <- c()
+    }
+  } else {
+    current_paragraph_trump <- c(current_paragraph_trump, line_trump)
+  }
+}
+
+if (length(current_paragraph_trump) > 0) {
+  paragraphs_trump <- c(paragraphs_trump, paste(current_paragraph_trump, collapse = " "))
+}
+
+imported_text_trump <- data.frame(text = paragraphs_trump, stringsAsFactors = FALSE)
+```
+
+```{r}
+# add line number
+text_df_trump <- tibble(line = 1:nrow(imported_text_trump), text = imported_text_trump$text)
+```
+
+```{r}
+# tidy data frame
+text_tidy_trump <- text_df_trump %>%
+  unnest_tokens(word, text)
+
+# remove stop words
+data(stop_words)
+text_tidy_trump <- text_tidy_trump %>%
+  anti_join(stop_words, by = join_by(word))
+```
+
+### 2.2 Keyword Frequency & Sentiments 
+
+The first graph shows **the frequency of the most common words** in each speech, with words colored with corresponding sentiments in NRC lexicon.
+
+```{r}
+# Harris
+# get sentiments for each word
+nrc_word_counts_harris <- text_tidy_harris %>%
+  inner_join(get_sentiments("nrc"), by = join_by(word)) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+```
+
+```{r}
+# visualization
+plot1_harris <- nrc_word_counts_harris %>%
+  filter(n >= 2) %>% # keep word appears more than once
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col() +
+  coord_flip() +
+  labs(y = "sentiment (n > 1)") +
+  ggtitle("Common Words & Sentiments (Harris)")
+
+plot1_harris
+```
+
+In Harris’s speech, the word **“fight”** stands out as an outlier, appearing more than 50 times. Additionally, **“fight”** is associated with three emotions: anger, fear, and negative.
+
+```{r}
+# Trump
+# get sentiments for each word
+nrc_word_counts_trump <- text_tidy_trump %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+```
+
+```{r}
+# visualization
+plot1_trump <- nrc_word_counts_trump %>%
+  filter(n >= 3) %>% # keep word appears more than twice
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col() +
+  coord_flip() +
+  labs(y = "sentiment (n > 2)") +
+  ggtitle("Common Words & Sentiments (Trump)")
+
+plot1_trump
+```
+
+Trump's speech contains more key words, like **"president"**, **"victory"**, **"powerful"**, and **"vote"**.
+
+### 2.3 Sentiment Distribution
+
+The second graph illustrates **the distribution of sentiments** in NRC lexicon within the speeches.
+
+```{r}
+# Harris
+plot2_harris <- nrc_word_counts_harris %>%
+  inner_join(get_sentiments("nrc"), by = join_by(word, sentiment)) %>%
+  count(word, sentiment) %>% # word counts for each sentiment
+  ggplot(aes(sentiment, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  ggtitle("Sentiments Distribution (Harris)") +
+  coord_flip()
+
+plot2_harris
+
+```
+
+```{r}
+# Trump
+plot2_trump <- nrc_word_counts_trump %>%
+  inner_join(get_sentiments("nrc"), by = join_by(word, sentiment)) %>%
+  count(word, sentiment) %>% # word counts for each sentiment
+  ggplot(aes(sentiment, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  ggtitle("Sentiments Distribution (Trump)") +
+  coord_flip()
+
+plot2_trump
+
+```
+
+Surprisingly, despite the significant differences in keyword structures between the two speeches, their distribution of sentiments is **remarkably similar**. A subtle difference is that Harris’s speech contains even **more trust** and **fewer negative** emotions. This could be attributed to the need to appear strong and optimistic after the election loss, as well as to express gratitude to her supporters.
+
+### 2.4 Intertemporal Use of Sentiments (Conditional Mean)
+
+The third graph shows the **conditional mean of word counts** for all sentiment categories throughout the speech.
+
+```{r}
+# Harris
+# get word counts of all sentiments for each line
+nrc_line_counts_harris <- text_tidy_harris %>%
+  inner_join(get_sentiments("nrc"), by = join_by(word)) %>%
+  count(line, sentiment, sort = TRUE) %>%
+  ungroup()
+```
+
+```{r}
+plot3_harris <- ggplot(data = nrc_line_counts_harris, mapping = aes(x = line, y = n)) +
+  geom_smooth() +  
+  xlab("document (line)") +  
+  ylab("sentiment (conditional mean)") +
+  ggtitle("Intertemporal Use of Sentiments (Conditional Mean Harris)")
+
+plot3_harris
+```
+
+```{r}
+# Trump
+# get word counts of all sentiments for each line
+nrc_line_counts_trump <- text_tidy_trump %>%
+  inner_join(get_sentiments("nrc")) %>%
+  count(line, sentiment, sort = TRUE) %>%
+  ungroup()
+```
+
+```{r}
+plot3_trump <- ggplot(data = nrc_line_counts_trump, mapping = aes(x = line, y = n)) +
+  geom_smooth() +  
+  xlab("document (line)") +  
+  ylab("sentiment (conditional mean)") +
+  ggtitle("Intertemporal Use of Sentiments (Conditional Mean Trump)")
+
+plot3_trump
+```
+
+It appears that Harris’s speech is **more emotional** than Trump’s. Harris’s curve remains above 4, fluctuating around 5, whereas Trump’s curve, although exceeding 5 at the beginning of his speech, stays below 4 for the most part.
+
+### 2.5 Overall Sentiment Scores
+
+The fourth graph displays the **sentiment scores throughout the speech**, as measured by the **Bing lexicon**.
+
+```{r}
+# Harris
+# get sentiments of each word per line
+bing_word_counts_harris <- bind_rows(
+  text_tidy_harris %>%  
+    inner_join(get_sentiments("bing"), by = join_by(word)) %>%
+    mutate(method = "Bing et al."))
+```
+
+```{r}
+sentiment_sum_harris <- ifelse(bing_word_counts_harris$sentiment == "positive", 1, -1) # sentiment score = n(positive) - n(negative)
+sentiment_sum_harris_df <- cbind(bing_word_counts_harris$line, sentiment_sum_harris)
+colnames(sentiment_sum_harris_df) <- c('var1', 'var2')
+sentiment_sum_harris_df <- as.data.frame(sentiment_sum_harris_df)
+sentiment_sum_harris_df <- aggregate(sentiment_sum_harris_df$var2, by=list(line=sentiment_sum_harris_df$var1), FUN=sum)
+```
+
+```{r}
+plot4_harris <- ggplot(data = sentiment_sum_harris_df, mapping = aes(x = line, y = x)) +  
+  geom_smooth() +  
+  xlab("document (line)") +  
+  ylab("sentiment (score)") +
+  ggtitle("Intertemporal Use of Sentiments (Bing Score Harris)")
+
+plot4_harris
+```
+
+```{r}
+# Trump
+# get sentiments of each word per line
+bing_word_counts_trump <- bind_rows(
+  text_tidy_trump %>%  
+    inner_join(get_sentiments("bing"), by = join_by(word)) %>%
+    mutate(method = "Bing et al."))
+```
+
+```{r}
+sentiment_sum_trump <- ifelse(bing_word_counts_trump$sentiment == "positive", 1, -1) # sentiment score = n(positive) - n(negative)
+sentiment_sum_trump_df <- cbind(bing_word_counts_trump$line, sentiment_sum_trump)
+colnames(sentiment_sum_trump_df) <- c('var1', 'var2')
+sentiment_sum_trump_df <- as.data.frame(sentiment_sum_trump_df)
+sentiment_sum_trump_df <- aggregate(sentiment_sum_trump_df$var2, by=list(line=sentiment_sum_trump_df$var1), FUN=sum)
+```
+
+```{r}
+plot4_trump <- ggplot(data = sentiment_sum_trump_df, mapping = aes(x = line, y = x)) +  
+  geom_smooth() +  
+  xlab("document (line)") +  
+  ylab("sentiment (score)") +
+  ggtitle("Intertemporal Use of Sentiments (Bing Score Trump)")
+
+plot4_trump
+```
+
+Both Harris and Trump’s speeches follow **a similar pattern**: starting on a highly positive note, gradually declining in sentiment, and then rising at the end. This may reflect a common structure in political speeches. Politicians may aim to present an optimistic image at the beginning and conclusion while addressing more serious or negative topics in the body of the speech.
+
+However, an interesting point appears in the middle of Trump’s speech, where **sentiment scores drop below zero**, indicating that negative emotions outweighed positive ones. This is surprising given that he was the election winner. This raises questions about the **validity of the sentiment lexicon** used, prompting us to compare results by applying a different lexicon.
+
+## 3. Extension
+
+Beyond replicating the original study, we introduce **two key extensions** to enhance the analysis:
+
+1.  **Comparing Sentiment Lexicons: Bing and VADER**
+
+-   The original study primarily relies on the **Bing** lexicon.\
+-   We extend this by using **VADER**, which accounts for **sentiment intensity** and **negation handling**.
+
+2.  **Negation Handling and Validation**
+
+-   Given the frequent occurrence of **negation words** (e.g., *don't*, *doesn't*) in the drop of Harris's speech, we conduct an additional **validation**.\
+-   By **removing negation terms**, we examine how they impact sentiment scores measured by **VADER**.
+
+### 3.1 Comparing Bing and VADER
+
+```{r}
+# Harris
+# apply VADER lexicon
+vader_results_harris <- vader_df(text_df_harris$text)
+
+vader_results_harris <- cbind(text_df_harris$line, vader_results_harris)
+colnames(vader_results_harris)[1] <- "line"
+
+sentiment_vader_harris_df <- aggregate(vader_results_harris$compound,
+  by = list(line = vader_results_harris$line),
+  FUN = sum)
+```
+
+```{r}
+plot5_harris <- ggplot(data = sentiment_vader_harris_df, mapping = aes(x = line, y = x)) +
+  geom_smooth() +
+  xlab("document (line)") +
+  ylab("sentiment (score)") +
+  ggtitle("Intertemporal Use of Sentiments (VADER Score Harris)")
+
+plot5_harris
+```
+
+```{r}
+# Trump
+# apply VADER lexicon
+vader_results_trump <- vader_df(text_df_trump$text)
+
+vader_results_trump <- cbind(text_df_trump$line, vader_results_trump)
+colnames(vader_results_trump)[1] <- "line"
+
+sentiment_vader_trump_df <- aggregate(vader_results_trump$compound,
+  by = list(line = vader_results_trump$line),
+  FUN = sum)
+```
+
+```{r}
+plot5_trump <- ggplot(data = sentiment_vader_trump_df, mapping = aes(x = line, y = x)) +
+  geom_smooth() +
+  xlab("document (line)") +
+  ylab("sentiment (score)") +
+  ggtitle("Intertemporal Use of Sentiments (VADER Score Trump)")
+
+plot5_trump
+```
+
+```{r}
+# combine two graphs for Bing
+sentiment_sum_trump_df$person <- "Trump"
+sentiment_sum_harris_df$person <- "Harris"
+
+sentiment_combined_df <- bind_rows(sentiment_sum_trump_df, sentiment_sum_harris_df)
+
+plot4_combined <- ggplot(data = sentiment_combined_df, mapping = aes(x = line, y = x, color = person)) +
+  geom_smooth(se = FALSE, size = 1) +  
+  xlab("Document (Line)") +
+  ylab("Sentiment (Score)") +
+  ggtitle("Intertemporal Use of Sentiments (Being Score)") +
+  scale_color_manual(values = c("Trump" = "red", "Harris" = "blue")) + 
+  theme_minimal()
+
+plot4_combined
+```
+
+```{r}
+# combine two graphs for VADER
+sentiment_vader_trump_df$person <- "Trump"
+sentiment_vader_harris_df$person <- "Harris"
+
+vader_combined_df <- bind_rows(sentiment_vader_trump_df, sentiment_vader_harris_df)
+
+plot5_combined <- ggplot(data = vader_combined_df, mapping = aes(x = line, y = x, color = person)) +
+  geom_smooth(se = FALSE) + 
+  xlab("Document (Line)") +
+  ylab("Sentiment (Score)") +
+  ggtitle("Intertemporal Use of Sentiments (VADER Score)") +
+  scale_color_manual(values = c("Trump" = "red", "Harris" = "blue")) + 
+  theme_minimal()
+
+plot5_combined
+```
+
+Harris’ and Trump’s speeches exhibit **different sentiment patterns** when analyzed using the Bing and VADER lexicons. The VADER results indicate that Trump’s speech maintains a consistently positive sentiment throughout, whereas Harris’ sentiment score experiences a sharp decline at a certain point (around **7th paragraph**). To better understand this drop, we examined the paragraph at the lowest-sentiment score point.
+
+In the 7th paragraph, we see lots of negations:
+
+>On the campaign, I would often say when we fight, we win. But here's the thing, here's the thing, sometimes the fight takes a while. That doesn't mean we won't win. That doesn't mean we won't win. The important thing is don't ever give up. Don't ever give up. Don't ever stop trying to make the world a better place. You have power. You have power. And don't you ever listen when anyone tells you something is impossible because it has never been done before.
+
+In the next step, we tried to remove these negations (like **"don't"**, **"doesn't"**, **"don't ever"** and **"But"**) and see whether this drop will disappear.
+
+### 3.2 Negation Handling and Validation
+
+```{r}
+# load text without negations in the 7th paragraph
+lines_harris_new <- readLines("harris_remove_negations_in_7th_paragraph.txt")
+
+# per paragraph per line
+paragraphs_harris <- c()
+current_paragraph_harris <- c()
+
+for (line_harris in lines_harris_new) {
+  if (line_harris == "") {
+    if (length(current_paragraph_harris) > 0) {
+      paragraphs_harris <- c(paragraphs_harris, paste(current_paragraph_harris, collapse = " "))
+      current_paragraph_harris <- c()
+    }
+  } else {
+    current_paragraph_harris <- c(current_paragraph_harris, line_harris)
+  }
+}
+
+if (length(current_paragraph_harris) > 0) {
+  paragraphs_harris <- c(paragraphs_harris, paste(current_paragraph_harris, collapse = " "))
+}
+
+imported_text_harris_new <- data.frame(text = paragraphs_harris, stringsAsFactors = FALSE)
+
+text_df_harris_new <- tibble(line = 1:nrow(imported_text_harris_new), text = imported_text_harris_new$text)
+```
+
+```{r}
+# apply VADER lexicon to the new document
+vader_results_harris_new <- vader_df(text_df_harris_new$text)
+
+vader_results_harris_new <- cbind(text_df_harris_new$line, vader_results_harris_new)
+colnames(vader_results_harris_new)[1] <- "line"
+
+sentiment_vader_harris_df_new <- aggregate(vader_results_harris_new$compound,
+                                     by = list(line = vader_results_harris_new$line),
+                                     FUN = sum)
+
+plot5_harris_new <- ggplot(data = sentiment_vader_harris_df_new, mapping = aes(x = line, y = x)) +
+  geom_smooth() +
+  xlab("document (line)") +
+  ylab("sentiment (score)") +
+  ggtitle("Intertemporal Use of Sentiments (VADER Score Harris New)")
+
+plot5_harris_new
+```
+
+```{r}
+# combine two graphs for Harris
+sentiment_vader_harris_df <- sentiment_vader_harris_df %>% select(-person)
+
+sentiment_vader_harris_df$type <- "Original"
+sentiment_vader_harris_df_new$type <- "Negations Removed"
+
+vader_harris_combined_df <- bind_rows(sentiment_vader_harris_df, sentiment_vader_harris_df_new)
+
+plot5_harris_combined <- ggplot(data = vader_harris_combined_df, mapping = aes(x = line, y = x, color = type)) +
+  geom_smooth(se = FALSE) + 
+  xlab("Document (Line)") +
+  ylab("Sentiment (Score)") +
+  ggtitle("Intertemporal Use of Sentiments (VADER Score Harris)") +
+  scale_color_manual(values = c("Negations Removed" = "red", "Original" = "blue")) + 
+  theme_minimal()
+
+plot5_harris_combined
+```
+
+After removing the negations in the seventh paragraph, **the drop in Harris’s speech disappeared**, and the compound score of the seventh paragraph changed from **-0.773 to 0.866**. This indicates that VADER is **highly sensitive to negations**. The frequent occurrence of negations in the seventh paragraph indeed caused a sharp decline in Harris’s speech.
