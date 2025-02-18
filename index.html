@@ -9,7 +9,7 @@
 <meta name="author" content="Xiangming Zeng; Yihan Chen">
 <meta name="dcterms.date" content="2025-02-10">
 
-<title>Replicatin 1: Sentiment Analysis on Speeches</title>
+<title>Replication 1: Sentiment Analysis on Speeches</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -3086,7 +3086,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Replicatin 1: Sentiment Analysis on Speeches</h1>
+<h1 class="title">Replication 1: Sentiment Analysis on Speeches</h1>
 </div>
 
 
@@ -3125,7 +3125,7 @@ vertical-align: -.125em;
 <section id="background" class="level3">
 <h3 class="anchored" data-anchor-id="background">1.1 Background</h3>
 <p>For this replication exercise, we have selected <a href="https://doi.org/10.48550/arxiv.2206.12649"><em>Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data</em> by Klinkhammer (2022)</a>. The original paper presents a structured workflow for conducting sentiment analysis using <strong>tidytext</strong> in R, with a focus on visualizing sentiment trends in textual data.</p>
-<p>Our replication primarily focuses on the application part, which analyzes political speeches. The original tutorial examines two simultaneous speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated <a href="https://github.com/statistical-thinking/sentiment-analysis/tree/main">GitHub repository</a>.</p>
+<p>Our replication primarily focuses on the application part. The original tutorial examines two simultaneous political speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated <a href="https://github.com/statistical-thinking/sentiment-analysis/tree/main">GitHub repository</a>.</p>
 <p>Given this limitation, we selected two alternative speeches of political significance: <strong>Donald Trump’s victory speech</strong> and <strong>Kamala Harris’ concession speech</strong> from the 2024 U.S. presidential election.</p>
 <p>On November 6, 2024, former President Donald Trump was declared the winner of the U.S. presidential election. The Associated Press officially called the race at 5:38 a.m. ET, and Trump delivered his victory speech from Florida at 2:30 a.m. ET, celebrating what he described as “the greatest political movement of all time.” Meanwhile, Vice President Kamala Harris conceded the election in a speech delivered at Howard University in Washington, D.C., urging her supporters to continue fighting for democracy.</p>
 <p>We believe that comparing these two speeches would be very interesting. We attempt to explore whether sentiment analysis of the speeches can reveal the different emotional reactions of politicians to election victory and defeat.</p>
@@ -3137,28 +3137,28 @@ vertical-align: -.125em;
 <ul>
 <li>Loading and cleaning the text data from both speeches.</li>
 <li>Transforming the text into a <em>tibble</em> format.</li>
-<li>Structuring the dataset into a <em>tidy</em> format to facilitate sentiment analysis.</li>
+<li>Structuring the dataset into a <em>tidy data frame</em>.</li>
 </ul>
 </section>
 <section id="sentiment-analysis-and-visualization" class="level4">
 <h4 class="anchored" data-anchor-id="sentiment-analysis-and-visualization">1.2.2 Sentiment Analysis and Visualization</h4>
-<p>We replicate the <strong>four primary visualizations</strong> presented in the paper:</p>
+<p>We replicate the <strong>four visualizations</strong> presented in the paper:</p>
 <ol type="1">
-<li><strong>Keyword Sentiment Distribution</strong>
+<li><strong>Keyword Frequency &amp; Sentiments</strong>
 <ul>
-<li>Identifying the most frequent words and their associated sentiment scores.</li>
+<li>Identifying the most frequent words and their associated sentiments.</li>
 </ul></li>
-<li><strong>Lexicon-Based Sentiment Distribution</strong>
+<li><strong>Sentiment Distribution</strong>
 <ul>
-<li>Categorizing words into sentiment groups based on “nrc”.</li>
+<li>The distribution of sentiments in NRC lexicon.</li>
 </ul></li>
-<li><strong>Intertemporal Sentiment Trends</strong>
+<li><strong>Intertemporal Use of Sentiments (Conditional Mean)</strong>
 <ul>
-<li>Analyzing sentiment progression over the course of each speech.</li>
+<li>The conditional mean of word counts for all sentiment categories throughout the speech.</li>
 </ul></li>
-<li><strong>Overall Sentiment Scores</strong>
+<li><strong>Intertemporal Sentiment Scores (Bing)</strong>
 <ul>
-<li>Aggregating sentiment values to compare the tone of the two speeches using “bing”.</li>
+<li>The sentiment scores throughout the speech, as measured by the Bing lexicon.</li>
 </ul></li>
 </ol>
 </section>
@@ -3413,8 +3413,8 @@ vertical-align: -.125em;
 </div>
 <p>It appears that Harris’s speech is <strong>more emotional</strong> than Trump’s. Harris’s curve remains above 4, fluctuating around 5, whereas Trump’s curve, although exceeding 5 at the beginning of his speech, stays below 4 for the most part.</p>
 </section>
-<section id="overall-sentiment-scores" class="level3">
-<h3 class="anchored" data-anchor-id="overall-sentiment-scores">2.5 Overall Sentiment Scores</h3>
+<section id="intertemporal-sentiment-scores-bing" class="level3">
+<h3 class="anchored" data-anchor-id="intertemporal-sentiment-scores-bing">2.5 Intertemporal Sentiment Scores (Bing)</h3>
 <p>The fourth graph displays the <strong>sentiment scores throughout the speech</strong>, as measured by the <strong>Bing lexicon</strong>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Harris</span></span>

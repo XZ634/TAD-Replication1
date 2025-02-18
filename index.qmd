@@ -1,5 +1,5 @@
 ---
-title: "Replicatin 1: Sentiment Analysis on Speeches"
+title: "Replication 1: Sentiment Analysis on Speeches"
 author: "Xiangming Zeng; Yihan Chen"
 date: "2025-02-10"
 format:
@@ -24,7 +24,7 @@ rm(list=ls())
 
 For this replication exercise, we have selected [*Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data* by Klinkhammer (2022)](https://doi.org/10.48550/arxiv.2206.12649). The original paper presents a structured workflow for conducting sentiment analysis using **tidytext** in R, with a focus on visualizing sentiment trends in textual data.
 
-Our replication primarily focuses on the application part, which analyzes political speeches. The original tutorial examines two simultaneous speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated [GitHub repository](https://github.com/statistical-thinking/sentiment-analysis/tree/main).
+Our replication primarily focuses on the application part. The original tutorial examines two simultaneous political speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated [GitHub repository](https://github.com/statistical-thinking/sentiment-analysis/tree/main).
 
 Given this limitation, we selected two alternative speeches of political significance: **Donald Trump's victory speech** and **Kamala Harris' concession speech** from the 2024 U.S. presidential election.
 
@@ -38,20 +38,20 @@ We believe that comparing these two speeches would be very interesting. We attem
 
 -   Loading and cleaning the text data from both speeches.
 -   Transforming the text into a *tibble* format.
--   Structuring the dataset into a *tidy* format to facilitate sentiment analysis.
+-   Structuring the dataset into a *tidy data frame*.
 
 #### 1.2.2 Sentiment Analysis and Visualization
 
-We replicate the **four primary visualizations** presented in the paper:
+We replicate the **four visualizations** presented in the paper:
 
-1.  **Keyword Sentiment Distribution**
-    -   Identifying the most frequent words and their associated sentiment scores.
-2.  **Lexicon-Based Sentiment Distribution**
-    -   Categorizing words into sentiment groups based on "nrc".
-3.  **Intertemporal Sentiment Trends**
-    -   Analyzing sentiment progression over the course of each speech.
-4.  **Overall Sentiment Scores**
-    -   Aggregating sentiment values to compare the tone of the two speeches using "bing".
+1.  **Keyword Frequency & Sentiments**
+    -   Identifying the most frequent words and their associated sentiments.
+2.  **Sentiment Distribution**
+    -   The distribution of sentiments in NRC lexicon.
+3.  **Intertemporal Use of Sentiments (Conditional Mean)**
+    -   The conditional mean of word counts for all sentiment categories throughout the speech.
+4.  **Intertemporal Sentiment Scores (Bing)**
+    -   The sentiment scores throughout the speech, as measured by the Bing lexicon.
 
 ## 2. Sentiment Analysis On Political Speeches: Harris v.s. Trump
 
@@ -285,7 +285,7 @@ plot3_trump
 
 It appears that Harris’s speech is **more emotional** than Trump’s. Harris’s curve remains above 4, fluctuating around 5, whereas Trump’s curve, although exceeding 5 at the beginning of his speech, stays below 4 for the most part.
 
-### 2.5 Overall Sentiment Scores
+### 2.5 Intertemporal Sentiment Scores (Bing)
 
 The fourth graph displays the **sentiment scores throughout the speech**, as measured by the **Bing lexicon**.
 
