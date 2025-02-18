@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a repository for [*Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data* by Klinkhammer (2022)](https://doi.org/10.48550/arxiv.2206.12649). The original paper presents a structured workflow for conducting sentiment analysis using **tidytext** in R, with a focus on visualizing sentiment trends in textual data.
+This is a repository for [*Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data* by Klinkhammer (2022)](https://doi.org/10.48550/arxiv.2206.12649). The original paper presents a structured workflow for conducting sentiment analysis using **tidy data frame** in R, with a focus on visualizing sentiment trends in textual data.
 
 Our replication primarily focuses on the application part. The original tutorial examines two simultaneous political speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated [GitHub repository](https://github.com/statistical-thinking/sentiment-analysis/tree/main).
 
@@ -35,3 +35,23 @@ The contribution of our work is:
     -   Rather than **Bing** used in the original work, we tried to improve the workflow by using **"VADER lexicon"** and compared the performance of two lexicons.
 
 Overall, this is a repo that's suitable for freshmen in TAD to learn visualization associated with sentiment analysis.
+
+## References
+
+- Chen, A. C.-H. (2023). *Corpus linguistics*. Retrieved from  
+  [https://alvinntnu.github.io/NTNU_ENC2036_LECTURES/](https://alvinntnu.github.io/NTNU_ENC2036_LECTURES/)
+
+- Klinkhammer, D. (2022). *Sentiment analysis with R: Natural language processing for semi-automated assessments of qualitative data*. arXiv.  
+  [https://doi.org/10.48550/arxiv.2206.12649](https://doi.org/10.48550/arxiv.2206.12649)
+
+- Klinkhammer, D. (2022). *Sentiment analysis (Tutorial)*. GitHub. Retrieved from  
+  [https://github.com/statistical-thinking/sentiment-analysis/tree/main](https://github.com/statistical-thinking/sentiment-analysis/tree/main)
+
+- Newsweek. (2024). *Donald Trump’s victory speech in full: Transcript*. Retrieved from  
+  [https://www.newsweek.com/donald-trump-victory-speech-full-transcript-1981234](https://www.newsweek.com/donald-trump-victory-speech-full-transcript-1981234)
+
+- TIME. (2024). *Read Vice President Kamala Harris’ full concession speech*. Retrieved from  
+  [https://time.com/7173617/kamala-harris-concession-speech-full-transcript/](https://time.com/7173617/kamala-harris-concession-speech-full-transcript/)
+
+
+

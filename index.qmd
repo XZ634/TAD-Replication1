@@ -13,8 +13,8 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 ```{r}
-# loading packages
-pacman::p_load(tidyverse, stringr, tidytext, tidyr, igraph, ggraph, gridExtra, vader, janeaustenr, textdata)
+# load packages
+pacman::p_load(tidyverse, stringr, tidytext, tidyr, igraph, ggraph, gridExtra, vader, textdata)
 rm(list=ls())
 ```
 
@@ -22,7 +22,7 @@ rm(list=ls())
 
 ### 1.1 Background
 
-For this replication exercise, we have selected [*Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data* by Klinkhammer (2022)](https://doi.org/10.48550/arxiv.2206.12649). The original paper presents a structured workflow for conducting sentiment analysis using **tidytext** in R, with a focus on visualizing sentiment trends in textual data.
+For this replication exercise, we have selected [*Sentiment Analysis with R: Natural Language Processing for Semi-Automated Assessments of Qualitative Data* by Klinkhammer (2022)](https://doi.org/10.48550/arxiv.2206.12649). The original paper presents a structured workflow for conducting sentiment analysis using **tidy data frame** in R, with a focus on visualizing sentiment trends in textual data.
 
 Our replication primarily focuses on the application part. The original tutorial examines two simultaneous political speeches on the war in Ukraine. However, the corresponding datasets were not available in the associated [GitHub repository](https://github.com/statistical-thinking/sentiment-analysis/tree/main).
 
@@ -180,7 +180,7 @@ plot1_harris <- nrc_word_counts_harris %>%
 plot1_harris
 ```
 
-In Harris’s speech, the word **“fight”** stands out as an outlier, appearing more than 50 times. Additionally, **“fight”** is associated with three emotions: anger, fear, and negative.
+In Harris's speech, the word **"fight"** stands out as an outlier, appearing more than 50 times. Additionally, **"fight"** is associated with three emotions: anger, fear, and negative.
 
 ```{r}
 # Trump
@@ -239,7 +239,7 @@ plot2_trump
 
 ```
 
-Surprisingly, despite the significant differences in keyword structures between the two speeches, their distribution of sentiments is **remarkably similar**. A subtle difference is that Harris’s speech contains even **more trust** and **fewer negative** emotions. This could be attributed to the need to appear strong and optimistic after the election loss, as well as to express gratitude to her supporters.
+Surprisingly, despite the significant differences in keyword structures between the two speeches, their distribution of sentiments is **remarkably similar**. A subtle difference is that Harris's speech contains even **more trust** and **fewer negative** emotions. This could be attributed to the need to appear strong and optimistic after the election loss, as well as to express gratitude to her supporters.
 
 ### 2.4 Intertemporal Use of Sentiments (Conditional Mean)
 
@@ -283,7 +283,7 @@ plot3_trump <- ggplot(data = nrc_line_counts_trump, mapping = aes(x = line, y = 
 plot3_trump
 ```
 
-It appears that Harris’s speech is **more emotional** than Trump’s. Harris’s curve remains above 4, fluctuating around 5, whereas Trump’s curve, although exceeding 5 at the beginning of his speech, stays below 4 for the most part.
+It appears that Harris's speech is **more emotional** than Trump's. Harris's curve remains above 4, fluctuating around 5, whereas Trump's curve, although exceeding 5 at the beginning of his speech, stays below 4 for the most part.
 
 ### 2.5 Intertemporal Sentiment Scores (Bing)
 
@@ -343,9 +343,9 @@ plot4_trump <- ggplot(data = sentiment_sum_trump_df, mapping = aes(x = line, y =
 plot4_trump
 ```
 
-Both Harris and Trump’s speeches follow **a similar pattern**: starting on a highly positive note, gradually declining in sentiment, and then rising at the end. This may reflect a common structure in political speeches. Politicians may aim to present an optimistic image at the beginning and conclusion while addressing more serious or negative topics in the body of the speech.
+Both Harris and Trump's speeches follow **a similar pattern**: starting on a highly positive note, gradually declining in sentiment, and then rising at the end. This may reflect a common structure in political speeches. Politicians may aim to present an optimistic image at the beginning and conclusion while addressing more serious or negative topics in the body of the speech.
 
-However, an interesting point appears in the middle of Trump’s speech, where **sentiment scores drop below zero**, indicating that negative emotions outweighed positive ones. This is surprising given that he was the election winner. This raises questions about the **validity of the sentiment lexicon** used, prompting us to compare results by applying a different lexicon.
+However, an interesting point appears in the middle of Trump's speech, where **sentiment scores drop below zero**, indicating that negative emotions outweighed positive ones. This is surprising given that he was the election winner. This raises questions about the **validity of the sentiment lexicon** used, prompting us to compare results by applying a different lexicon.
 
 ## 3. Extension
 
@@ -445,7 +445,7 @@ plot5_combined <- ggplot(data = vader_combined_df, mapping = aes(x = line, y = x
 plot5_combined
 ```
 
-Harris’ and Trump’s speeches exhibit **different sentiment patterns** when analyzed using the Bing and VADER lexicons. The VADER results indicate that Trump’s speech maintains a consistently positive sentiment throughout, whereas Harris’ sentiment score experiences a sharp decline at a certain point (around **7th paragraph**). To better understand this drop, we examined the paragraph at the lowest-sentiment score point.
+Harris' and Trump's speeches exhibit **different sentiment patterns** when analyzed using the Bing and VADER lexicons. The VADER results indicate that Trump's speech maintains a consistently positive sentiment throughout, whereas Harris' sentiment score experiences a sharp decline at a certain point (around **7th paragraph**). To better understand this drop, we examined the paragraph at the lowest-sentiment score point.
 
 In the 7th paragraph, we see lots of negations:
 
@@ -523,4 +523,4 @@ plot5_harris_combined <- ggplot(data = vader_harris_combined_df, mapping = aes(x
 plot5_harris_combined
 ```
 
-After removing the negations in the seventh paragraph, **the drop in Harris’s speech disappeared**, and the compound score of the seventh paragraph changed from **-0.773 to 0.866**. This indicates that VADER is **highly sensitive to negations**. The frequent occurrence of negations in the seventh paragraph indeed caused a sharp decline in Harris’s speech.
+After removing the negations in the seventh paragraph, **the drop in Harris's speech disappeared**, and the compound score of the seventh paragraph changed from **-0.773 to 0.866**. This indicates that VADER is **highly sensitive to negations**. The frequent occurrence of negations in the seventh paragraph indeed caused a sharp decline in Harris's speech.
