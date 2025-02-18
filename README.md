@@ -32,6 +32,6 @@ The contribution of our work is:
 1.  **New data**
     -   We compared **Donald Trump's victory speech** and **Kamala Harris' concession speech** from the 2024 U.S. presidential election, fixing the issue of lack of data in the original repo and increasing the repulicability.
 2.  **New dictionary**
-    -   Rather than **Bing** used in the original work, we tried to improve the workflow by using **"VADER lexicon"** and compared the performance of two lexicon.
+    -   Rather than **Bing** used in the original work, we tried to improve the workflow by using **"VADER lexicon"** and compared the performance of two lexicons.
 
 Overall, this is a repo that's suitable for freshmen in TAD to learn visualization associated with sentiment analysis.
